@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>PTS Sistemi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #5c9ce6;
+            --accent-color: #3498db;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --text-light: #ffffff;
+            --background-light: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transition: all var(--transition-speed);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: var(--text-light);
+            padding: 15px 25px;
+            transition: all var(--transition-speed);
+            border-radius: 0 25px 25px 0;
+            margin: 5px 0;
+            opacity: 0.85;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: translateX(10px);
+            opacity: 1;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all var(--transition-speed);
+        }
+        
+        .navbar {
+            margin-left: 250px;
+            transition: all var(--transition-speed);
+            background: white !important;
+            box-shadow: var(--card-shadow);
+        }
+
+        .navbar .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 50%;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .main-content, .navbar {
+                margin-left: 0;
+            }
+            .main-content.active, .navbar.active {
+                margin-left: 250px;
+            }
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-profile {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .user-profile img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 3px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            transition: transform var(--transition-speed);
+            background: white;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+            transition: all var(--transition-speed);
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background-color: var(--background-light);
+            border-bottom: none;
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: var(--card-shadow);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .edit-btn {
+            border-radius: 8px;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        .btn-group {
+            margin-bottom: 1rem;
+        }
+
+        .btn-group .btn {
+            margin-right: 0.5rem;
+        }
+
+        .btn-group .btn:last-child {
+            margin-right: 0;
+        }
+
+        .btn-group .btn.active {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .badge {
+            padding: 0.5em 1em;
+            font-size: 0.875rem;
+        }
+
+        .table-responsive {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar col-md-3 col-lg-2">
+        <div class="sidebar-header">
+            <h4 class="text-center">PTS Sistemi</h4>
+        </div>
+        <div class="user-profile">
+            <img src="/images/default-profile.png" alt="Profil" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAABHNCSVQICAgIfAhkiAAAABl0RVh0U29mdHdhcmUAZ25vbWUtc2NyZWVuc2hvdO8Dvz4AAAAmdEVYdENyZWF0aW9uIFRpbWUAMjAyNC0wMS0xOFQxNDo1ODo1OCswMzowMExgvqkAAATkSURBVHic7ZtfiFVVHMc/v3Nn7syYOTPjzKiVoWWUEQWBSRG9RQQRQQ8FPUQPFUEQ9BJEL0EPRQ8RQRBEL0EQQSQ9RARBEL0EQRQVRZQ5/XFmHHVmHGd0+nV3Z+495+y99jn77DP3nO8L9nDvWr+99u/7W2uvtfZvX6W1ZpGxgbXAHcBWYAuwDlgLrARKQMn8rQ+0gSbwK3AaOAEcB44Cv2UteNYKvBt4HHgQWJNxW78DnwMfAV9n3FY6aK0z+QAbgY+ALoDAn0vAu8CGrOQIJUCGnR8EjgHbgQKLBwXcBewGvgGeAlbkqcBNwD7gLLA7R6FjUQB2AGeAZ4B13koDUAIeA34EngcqeUgUgwrwInAKeDRLQYrAq8CPwP1ZNpQytwL7gVcAlbYwBbwBHALuyKLynLgf+Ap4ME1hCngL+ATwp1lphtwEfA68TErKfBX4IKX6FhL3Ap8ClTQqewY4CNycQj0LlTuBA0AxaSXLgS+AexJXsfDZBnxKQh+xBHwJbEtB+GLhLuBzEozKReAgsDkl4YuJrcABYiiyCBwG7k1R6GLkQeAwMVbjAvA9sCdlgYuZvcB3hFTkMvA1sCcDYYudPcARQijSB3xL9muKpcIe4BsCvLQC8BnwWEaCgngK+JiA0fgV4P0MhQRxEPgQn5FYAd8Q4/NbIhbvAe/hocQS8GHGAoJ4B3gbn3n3MvBChoK8eA14yVVQAN7OVo8v+4DXXQUF4K1stfjyOvCGq6AAvJqxGD9eAV51FRSA57IX48vz+EyLBeDZHAT58QwePrIC8FQegnx4EtdCRWudmxovNLXWPVeBwvXvXKK1HmitO66CQs7KG0JrrQdd170KhYXQgQOtdctVUMxZeUNorVtd171yFgq51vp/dF0Fy7VWN9Ba97XWbVdBMWflDdF1FSznrLwhBq6CUs7KG6LnKijmrLwh+q6CfL6QN9J3FRRyVt4QgaugkrPyhqi4Cko5K2+IkqugmLPyhii6CpZrrXxorX1orZcDK1wFxZyVN0TRVVDOWXlDlF0FKzNW3BxwDvgD+B1oAH8BF4E/zd8F87cV5nt1E/AAsM58r8hKeQBLgVXmk4qPuNFcYxNwP3C7+RRSaicJK4E3gYvM3tX5H3AIeJnZO0Np0wA+N7KHcRl4jQiDWdxR+EFmb9efBX4G3gUeIb8lVQF4HDgM/OUh5xLwOHHXIHEUuBP4hPDbRJeBT4HtxO9QElYDrwHnPWS6CrxH0OgbxLyY7Wut+1rrc1rr17XWa+PUMQcagKcAz2utL3jI0FrrI1rrzXGFmG8EbgU+wPW7Kxu2AO8TcA4yCfNR4E7gY+Y2f2XBKuBd4hwgno8C1wOfkP0IHEYReI4Y96rmOgKrwOfkP/cNUwWeJsY96rkosAB8xMJZPm0H3iFGNuNcFPgSC2e3ZxfwIjGUGFeBW4H3mF/KQFbsIYVzJHEUWAHeZmF4W0E8gSVvLCqjFLgWeJ/sN+WisI2Iu1JRFVgCDpDf5DwKG4CXiLg8i6LAMvAx+Z9UCMsm4BkiHgyKosA9wA4iGpwj64HniDCqR1HgLuJtPS0EthNhpR5FgTvjS1sw3E+E0xNhFVgHdiavb0GwnQj3pcMqcCcL0+eLS4WI96XDKHA78bZ7FhKbiXBvKqwCt6SjawGxkQj3psIqcH16uhYMa4lwbyrMPPgP8C8pn7NfQKwmwr2psN7IBaCSoq6FQoUI96bCKnAVi/+/5QXwL38Dq3K++IvwAAAAAElFTkSuQmCC'" />
+            <h6 class="text-white" sec:authentication="name"></h6>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#abone-ekle" data-section="abone-ekle">
+                    <i class='bx bxs-user-plus'></i> Abone Ekle
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#abone-bul" data-section="abone-bul">
+                    <i class='bx bxs-search'></i> Abone Bul
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#plaka-hareket" data-section="plaka-hareket">
+                    <i class='bx bxs-car'></i> Plaka Hareket
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#profil" data-section="profil">
+                    <i class='bx bxs-user'></i> Profil
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#ayarlar" data-section="ayarlar">
+                    <i class='bx bxs-cog'></i> Ayarlar
+                </a>
+            </li>
+            <li class="nav-item mt-auto">
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="nav-link w-100 text-start border-0 bg-transparent">
+                        <i class='bx bxs-log-out'></i> Çıkış Yap
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <button class="btn btn-dark d-md-none" id="sidebarToggle">
+                <i class='bx bx-menu'></i>
+            </button>
+            <div class="ms-auto">
+                <span class="text-white me-3" id="wsStatus">
+                    <i class='bx bxs-circle text-danger'></i> Bağlantı Bekleniyor...
+                </span>
+                <span class="text-white me-3">
+                    <i class='bx bxs-bell'></i>
+                </span>
+                <span class="text-white">
+                    <i class='bx bxs-message'></i>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Dashboard Section -->
+        <div class="content-section active" id="abone-ekle-content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Abone Bilgileri</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="abone-form">
+                                    <!-- Plaka ve AdSoyad Bilgileri -->
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0"><i class='bx bxs-car'></i> Plaka ve Ad Soyad Bilgileri</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="form-label">Plaka</label>
+                                                    <input type="text" class="form-control" name="plaka">
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="form-label">Ad</label>
+                                                    <input type="text" class="form-control" name="ad">
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="form-label">Soyad</label>
+                                                    <input type="text" class="form-control" name="soyad">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Kişisel Bilgiler -->
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0"><i class='bx bxs-user-detail'></i> Kişisel Bilgiler</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 mb-3">
+                                                    <label class="form-label">T.C. Kimlik No</label>
+                                                    <input type="text" class="form-control" name="tcKimlikNo">
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Email</label>
+                                                    <input type="email" class="form-control" name="email">
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Telefon</label>
+                                                    <input type="tel" class="form-control" name="telefon">
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Adres</label>
+                                                    <input type="text-area" class="form-control" name="adres">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class='bx bxs-save'></i> Kaydet
+                                        </button>
+                                        <button type="reset" class="btn btn-secondary">
+                                            <i class='bx bx-reset'></i> Temizle
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abone Bul Section -->
+        <div class="content-section" id="abone-bul-content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Abone Ara</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="abone-ara-form" class="mb-4">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="searchPlaka">Plaka</label>
+                                                <input type="text" class="form-control" id="searchPlaka" name="plaka">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label for="searchTc">TC Kimlik No</label>
+                                                <input type="text" class="form-control" id="searchTc" name="tcKimlikNo">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class='bx bx-search'></i> Ara
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                <div id="searchResults" style="display: none;">
+                                    <h6 class="mb-3">Arama Sonuçları</h6>
+                                    <div class="table-responsive mb-4">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Plaka</th>
+                                                    <th>Ad</th>
+                                                    <th>Soyad</th>
+                                                    <th>TC Kimlik No</th>
+                                                    <th>İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="searchResultsTable">
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <form id="abone-guncelle-form" style="display: none;">
+                                        <h6 class="mb-3">Abone Bilgileri</h6>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Plaka</label>
+                                                <input type="text" class="form-control" name="plaka" readonly>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Ad</label>
+                                                <input type="text" class="form-control" name="ad">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Soyad</label>
+                                                <input type="text" class="form-control" name="soyad">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">TC Kimlik No</label>
+                                                <input type="text" class="form-control" name="tcKimlikNo">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Telefon</label>
+                                                <input type="text" class="form-control" name="telefon">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" name="email">
+                                            </div>
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Adres</label>
+                                                <input type="text" class="form-control" name="adres">
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="button" class="btn btn-danger me-2" id="deleteAboneBtn">
+                                                <i class='bx bxs-trash'></i> Sil
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class='bx bxs-save'></i> Güncelle
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="content-section" id="profil-content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Profil Bilgileri</h5>
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <div class="mb-3">
+                                        <label class="form-label">Kullanıcı Adı</label>
+                                        <input type="text" class="form-control" th:value="${#authentication.name}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Yeni Şifre</label>
+                                        <input type="password" class="form-control">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Şifre Tekrar</label>
+                                        <input type="password" class="form-control">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Güncelle</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="content-section" id="ayarlar-content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Sistem Ayarları</h5>
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <div class="mb-3">
+                                        <label class="form-label">Bildirimler</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications">
+                                            <label class="form-check-label" for="emailNotifications">E-posta Bildirimleri</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Tema</label>
+                                        <select class="form-select">
+                                            <option>Açık Tema</option>
+                                            <option>Koyu Tema</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plaka Hareket Section -->
+        <div class="content-section" id="plaka-hareket-content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">Plaka Hareketleri</h5>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-primary" onclick="loadLastTenPlates()">Son 10 Plaka</button>
+                                    <button type="button" class="btn btn-primary" onclick="loadRecentMovements()">Son 30 Dk Hareketler</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Plaka</th>
+                                                <th>Giriş Tarihi</th>
+                                                <th>Çıkış Tarihi</th>
+                                                <th>Durum</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="plakaHareketTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plaka Hareket Modal -->
+    <div class="modal fade" id="plakaHareketModal" tabindex="-1" aria-labelledby="plakaHareketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="plakaHareketModalLabel">Araç Hareketi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert" id="plakaHareketAlert" role="alert">
+                        <!-- Alert içeriği dinamik olarak doldurulacak -->
+                    </div>
+                    <div class="plaka-bilgileri">
+                        <p><strong>Plaka:</strong> <span id="modalPlaka"></span></p>
+                        <p><strong>İşlem:</strong> <span id="modalIslem"></span></p>
+                        <p><strong>Tarih/Saat:</strong> <span id="modalZaman"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let lastKnownData = null;
+        let pollingInterval = null;
+
+        // Sayfa yüklendiğinde polling'i başlat
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Page loaded, initializing polling...");
+            startPolling();
+            // İlk yüklemede tabloyu göster
+            loadLastTenPlates();
+
+            // Abone arama formu submit handler'ı
+            const aboneAraForm = document.getElementById('abone-ara-form');
+            if (aboneAraForm) {
+                aboneAraForm.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Formun normal submit işlemini engelle
+                    
+                    const plaka = document.getElementById('searchPlaka').value;
+                    const tcKimlikNo = document.getElementById('searchTc').value;
+                    
+                    if (!plaka && !tcKimlikNo) {
+                        alert('Lütfen plaka veya TC kimlik numarası giriniz.');
+                        return;
+                    }
+
+                    // Arama sonuçları bölümünü göster
+                    const searchResults = document.getElementById('searchResults');
+                    searchResults.style.display = 'block';
+                    
+                    // Arama sonuçları tablosunu temizle ve yükleniyor mesajı göster
+                    const searchResultsTable = document.getElementById('searchResultsTable');
+                    searchResultsTable.innerHTML = '<tr><td colspan="5" class="text-center">Aranıyor...</td></tr>';
+
+                    // Doğru endpoint'i seç ve isteği yap
+                    let searchUrl;
+                    if (plaka) {
+                        searchUrl = `/pts/abone/ara/plaka/${encodeURIComponent(plaka)}`;
+                    } else {
+                        searchUrl = `/pts/abone/ara/tc/${encodeURIComponent(tcKimlikNo)}`;
+                    }
+
+                    fetch(searchUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Arama sırasında bir hata oluştu');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (!data || data.length === 0) {
+                                searchResultsTable.innerHTML = '<tr><td colspan="5" class="text-center">Sonuç bulunamadı</td></tr>';
+                                return;
+                            }
+
+                            // Sonuçları tabloya ekle
+                            searchResultsTable.innerHTML = '';
+                            data.forEach(abone => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${abone.plaka || '-'}</td>
+                                    <td>${abone.ad || '-'}</td>
+                                    <td>${abone.soyad || '-'}</td>
+                                    <td>${abone.tcKimlikNo || '-'}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm edit-btn" 
+                                                onclick="editAbone(${JSON.stringify(abone).replace(/"/g, '&quot;')})">
+                                            <i class='bx bxs-edit'></i> Düzenle
+                                        </button>
+                                    </td>
+                                `;
+                                searchResultsTable.appendChild(row);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Arama hatası:', error);
+                            searchResultsTable.innerHTML = `
+                                <tr>
+                                    <td colspan="5" class="text-center text-danger">
+                                        Arama sırasında bir hata oluştu: ${error.message}
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                });
+            }
+        });
+
+        // Abone düzenleme fonksiyonu
+        function editAbone(abone) {
+            const form = document.getElementById('abone-guncelle-form');
+            form.style.display = 'block';
+            
+            // Form alanlarını doldur
+            form.querySelector('input[name="plaka"]').value = abone.plaka || '';
+            form.querySelector('input[name="ad"]').value = abone.ad || '';
+            form.querySelector('input[name="soyad"]').value = abone.soyad || '';
+            form.querySelector('input[name="tcKimlikNo"]').value = abone.tcKimlikNo || '';
+            form.querySelector('input[name="telefon"]').value = abone.telefon || '';
+            form.querySelector('input[name="email"]').value = abone.email || '';
+            form.querySelector('input[name="adres"]').value = abone.adres || '';
+        }
+
+        // Abone güncelleme formu submit handler'ı
+        document.getElementById('abone-guncelle-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const aboneData = Object.fromEntries(formData.entries());
+            
+            fetch('/pts/abone/guncelle', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(aboneData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Güncelleme sırasında bir hata oluştu');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                alert(data.success || 'Abone bilgileri başarıyla güncellendi');
+                // Arama formunu tekrar submit et
+                document.getElementById('abone-ara-form').dispatchEvent(new Event('submit'));
+            })
+            .catch(error => {
+                console.error('Güncelleme hatası:', error);
+                alert(error.message || 'Güncelleme sırasında bir hata oluştu');
+            });
+        });
+
+        // Abone silme işlemi
+        document.getElementById('deleteAboneBtn')?.addEventListener('click', function() {
+            if (!confirm('Bu aboneyi silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            const plaka = document.querySelector('#abone-guncelle-form input[name="plaka"]').value;
+            
+            fetch('/pts/abone/sil/' + encodeURIComponent(plaka), {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Silme sırasında bir hata oluştu');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                alert(data.success || 'Abone başarıyla silindi');
+                // Formu gizle ve arama sonuçlarını temizle
+                document.getElementById('abone-guncelle-form').style.display = 'none';
+                document.getElementById('searchResults').style.display = 'none';
+                // Arama formunu temizle
+                document.getElementById('abone-ara-form').reset();
+            })
+            .catch(error => {
+                console.error('Silme hatası:', error);
+                alert(error.message || 'Silme sırasında bir hata oluştu');
+            });
+        });
+
+        function startPolling() {
+            // Plaka Hareket sekmesi aktif değilse polling'i başlatma
+            const plakaHareketContent = document.getElementById('plaka-hareket-content');
+            if (!plakaHareketContent || !plakaHareketContent.classList.contains('active')) {
+                return;
+            }
+
+            // Her 5 saniyede bir kontrol et
+            pollingInterval = setInterval(() => {
+                checkForChanges();
+            }, 5000);
+            
+            // İlk kontrolü hemen yap
+            checkForChanges();
+        }
+
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
+        function checkForChanges() {
+            // Plaka Hareket sekmesi aktif değilse kontrol yapma
+            const plakaHareketContent = document.getElementById('plaka-hareket-content');
+            if (!plakaHareketContent || !plakaHareketContent.classList.contains('active')) {
+                stopPolling();
+                return;
+            }
+
+            console.log("Checking for changes...");
+            fetch('/pts/plaka-hareket/last-ten')
+                .then(response => response.json())
+                .then(data => {
+                    // İlk veri alımı
+                    if (!lastKnownData) {
+                        lastKnownData = data;
+                        updatePlakaHareketTable(data);
+                        return;
+                    }
+
+                    // Değişiklik kontrolü
+                    const hasChanges = JSON.stringify(data) !== JSON.stringify(lastKnownData);
+                    if (hasChanges) {
+                        console.log("Changes detected");
+                        // Yeni kayıtları bul
+                        const newRecords = data.filter(record => 
+                            !lastKnownData.some(oldRecord => 
+                                oldRecord.plaka === record.plaka && 
+                                oldRecord.girisZamani === record.girisZamani && 
+                                oldRecord.cikisZamani === record.cikisZamani
+                            )
+                        );
+
+                        // Yeni kayıtlar için popup göster
+                        newRecords.forEach(record => {
+                            const islemTipi = !record.cikisZamani ? 'GİRİŞ' : 'ÇIKIŞ';
+                            showPlakaHareketPopup({
+                                plaka: record.plaka,
+                                islemTipi: islemTipi,
+                                zaman: record.cikisZamani || record.girisZamani
+                            });
+                        });
+
+                        // Tabloyu güncelle
+                        updatePlakaHareketTable(data);
+                        lastKnownData = data;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking for changes:", error);
+                });
+        }
+
+        // Plaka Hareket tablosunu güncelleme fonksiyonu
+        function updatePlakaHareketTable(data) {
+            console.log("Raw data received:", JSON.stringify(data, null, 2));
+            const tableBody = document.getElementById('plakaHareketTableBody');
+            if (!tableBody) {
+                console.error("Table body element not found!");
+                return;
+            }
+            
+            if (!Array.isArray(data) || data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Kayıt bulunamadı</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = '';
+            data.forEach(hareket => {
+                try {
+                    console.log("Processing record:", hareket);
+                    
+                    const row = document.createElement('tr');
+                    
+                    // Tarih formatlaması
+                    let girisTarihi = '-';
+                    let cikisTarihi = '-';
+                    
+                    if (hareket.girisTarihi) {
+                        try {
+                            const girisDate = new Date(hareket.girisTarihi);
+                            if (!isNaN(girisDate.getTime())) {
+                                girisTarihi = girisDate.toLocaleString('tr-TR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: false
+                                });
+                            }
+                        } catch (e) {
+                            console.error("Giriş tarihi formatlanırken hata:", e);
+                            girisTarihi = '-';
+                        }
+                    }
+                    
+                    if (hareket.cikisTarihi) {
+                        try {
+                            const cikisDate = new Date(hareket.cikisTarihi);
+                            if (!isNaN(cikisDate.getTime())) {
+                                cikisTarihi = cikisDate.toLocaleString('tr-TR', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: false
+                                });
+                            }
+                        } catch (e) {
+                            console.error("Çıkış tarihi formatlanırken hata:", e);
+                            cikisTarihi = '-';
+                        }
+                    }
+
+                    const durum = hareket.cikisTarihi ? 'Çıkış Yaptı' : 'İçeride';
+                    
+                    row.innerHTML = `
+                        <td>${hareket.plaka || '-'}</td>
+                        <td>${girisTarihi}</td>
+                        <td>${cikisTarihi}</td>
+                        <td><span class="badge ${hareket.cikisTarihi ? 'bg-success' : 'bg-primary'}">${durum}</span></td>
+                    `;
+                    tableBody.appendChild(row);
+                } catch (error) {
+                    console.error("Error processing row data:", error);
+                    console.log("Problematic record:", JSON.stringify(hareket, null, 2));
+                }
+            });
+        }
+
+        function loadLastTenPlates() {
+            console.log("Fetching last ten plates...");
+            const tableBody = document.getElementById('plakaHareketTableBody');
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Yükleniyor...</td></tr>';
+
+            fetch('/pts/plaka-hareket/last-ten')
+                .then(response => {
+                    console.log("Response status:", response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Received data:", data);
+                    lastKnownData = data;
+                    updatePlakaHareketTable(data);
+                })
+                .catch(error => {
+                    console.error("Error fetching last ten plates:", error);
+                    tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Veri yüklenirken hata oluştu: ${error.message}</td></tr>`;
+                });
+        }
+
+        function loadRecentMovements() {
+            console.log("Fetching recent movements...");
+            const tableBody = document.getElementById('plakaHareketTableBody');
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Yükleniyor...</td></tr>';
+
+            fetch('/pts/plaka-hareket/recent')
+                .then(response => {
+                    console.log("Response status:", response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Received data:", data);
+                    lastKnownData = data;
+                    updatePlakaHareketTable(data);
+                })
+                .catch(error => {
+                    console.error("Error fetching recent movements:", error);
+                    tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Veri yüklenirken hata oluştu: ${error.message}</td></tr>`;
+                });
+        }
+
+        // Popup gösterme fonksiyonu
+        function showPlakaHareketPopup(data) {
+            console.log("Showing popup for data:", data);
+            try {
+                // Modal içeriğini doldur
+                document.getElementById('modalPlaka').textContent = data.plaka;
+                document.getElementById('modalIslem').textContent = data.islemTipi;
+                document.getElementById('modalZaman').textContent = new Date(data.zaman).toLocaleString('tr-TR');
+                
+                // Alert'i ayarla
+                const alertDiv = document.getElementById('plakaHareketAlert');
+                alertDiv.className = 'alert alert-info';
+                alertDiv.textContent = `${data.plaka} plakalı araç için ${data.islemTipi} işlemi gerçekleşti.`;
+                
+                // Modal'ı göster
+                const modal = new bootstrap.Modal(document.getElementById('plakaHareketModal'));
+                modal.show();
+                
+                // 3 saniye sonra modal'ı kapat
+                setTimeout(() => {
+                    modal.hide();
+                }, 3000);
+            } catch (error) {
+                console.error("Error showing popup:", error);
+            }
+        }
+
+        // Sayfa kapatılırken polling'i durdur
+        window.addEventListener('beforeunload', function() {
+            stopPolling();
+        });
+
+        // Sekme değiştiğinde polling'i başlat/durdur
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopPolling();
+            } else {
+                startPolling();
+            }
+        });
+
+        // Content section switching
+        document.querySelectorAll('.nav-link[data-section]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all nav links
+                document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Hide all content sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.style.display = 'none';
+                    section.classList.remove('active');
+                });
+                
+                // Show selected content section
+                const sectionId = this.getAttribute('data-section') + '-content';
+                const selectedSection = document.getElementById(sectionId);
+                if (selectedSection) {
+                    selectedSection.style.display = 'block';
+                    selectedSection.classList.add('active');
+                    
+                    // Plaka Hareket sayfası açıldığında
+                    if (sectionId === 'plaka-hareket-content') {
+                        loadLastTenPlates(); // Son 10 plakayı yükle
+                        startPolling(); // Polling'i başlat
+                    } else {
+                        stopPolling(); // Başka sekmeye geçildiğinde polling'i durdur
+                    }
+                }
+            });
+        });
+
+        // Sidebar toggle işlemi
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                const sidebar = document.querySelector('.sidebar');
+                const mainContent = document.querySelector('.main-content');
+                const navbar = document.querySelector('.navbar');
+                
+                if (sidebar && mainContent && navbar) {
+                    sidebar.classList.toggle('active');
+                    mainContent.classList.toggle('active');
+                    navbar.classList.toggle('active');
+                }
+            });
+        }
+
+        // Abone ekleme formu submit handler'ı
+        document.getElementById('abone-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const aboneData = Object.fromEntries(formData.entries());
+            
+            // Boş alanları kontrol et
+            if (!aboneData.plaka || !aboneData.ad || !aboneData.soyad || !aboneData.tcKimlikNo) {
+                alert('Lütfen zorunlu alanları doldurunuz (Plaka, Ad, Soyad, TC Kimlik No)');
+                return;
+            }
+
+            fetch('/pts/abone/kaydet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(aboneData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                alert(data.success || 'Abone başarıyla eklendi');
+                this.reset(); // Formu temizle
+            })
+            .catch(error => {
+                console.error('Abone ekleme hatası:', error);
+                alert(error.message || 'Abone eklenirken bir hata oluştu');
+            });
+        });
+    </script>
+</body>
+</html> 
