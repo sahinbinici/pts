@@ -1,13 +1,17 @@
 package com.pts.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.pts.entity.PlakaHareket;
 import com.pts.service.PlakaHareketService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -17,23 +21,6 @@ import java.util.List;
 public class PlakaHareketController {
 
     private final PlakaHareketService plakaHareketService;
-    private final SimpMessagingTemplate messagingTemplate;
-
-    @GetMapping("/list")
-    public List<PlakaHareket> getAllPlakaHareketler() {
-        log.debug("getAllPlakaHareketler endpoint called");
-        List<PlakaHareket> hareketler = plakaHareketService.getAllPlakaHareketler();
-        log.debug("Found {} hareketler", hareketler.size());
-        return hareketler;
-    }
-
-    @GetMapping("/last-ten")
-    public List<PlakaHareket> getLastTenPlates() {
-        log.debug("getLastTenPlates endpoint called");
-        List<PlakaHareket> plates = plakaHareketService.getLastTenPlates();
-        log.debug("Returning {} plates", plates.size());
-        return plates;
-    }
 
     @GetMapping("/recent")
     public List<PlakaHareket> getRecentMovements() {
@@ -41,5 +28,13 @@ public class PlakaHareketController {
         List<PlakaHareket> movements = plakaHareketService.getRecentMovements();
         log.debug("Found {} recent movements", movements.size());
         return movements;
+    }
+
+    @GetMapping("/last-movement")
+    public PlakaHareket getLastMovement() {
+        log.debug("getLastMovement endpoint called");
+        PlakaHareket movement = plakaHareketService.getLastMovement();
+        log.debug("Found last movement for plate: {}", movement != null ? movement.getPlaka() : "null");
+        return movement;
     }
 } 

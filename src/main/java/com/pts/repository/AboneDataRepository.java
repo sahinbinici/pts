@@ -38,7 +38,7 @@ public class AboneDataRepository {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         
         this.aboneCreateCall = new SimpleJdbcCall(dataSource)
-                .withProcedureName("SP_ABONECREATE_TEST")
+                .withProcedureName("SP_ABONECREATE_SB")
                 .withSchemaName("dbo")
                 .declareParameters(
                         new SqlParameter("PLAKA", Types.NVARCHAR),
@@ -51,7 +51,7 @@ public class AboneDataRepository {
                 );
 
         this.aboneUpdateCall = new SimpleJdbcCall(dataSource)
-                .withProcedureName("SP_ABONEUPDATE_TEST")
+                .withProcedureName("SP_ABONEUPDATE_SB")
                 .withSchemaName("dbo")
                 .declareParameters(
                         new SqlParameter("PLAKA", Types.NVARCHAR),
@@ -64,7 +64,7 @@ public class AboneDataRepository {
                 );
 
         this.aboneDeleteCall = new SimpleJdbcCall(dataSource)
-                .withProcedureName("SP_ABONEDELETE_TEST")
+                .withProcedureName("SP_ABONEDELETE_SB")
                 .withSchemaName("dbo")
                 .declareParameters(
                         new SqlParameter("PLAKA", Types.NVARCHAR)
@@ -157,32 +157,6 @@ public class AboneDataRepository {
         }
     }
 
-    public boolean existsByPlaka(String plaka) {
-        String sql = "SELECT COUNT(*) FROM Plate.AboneData WHERE Plaka = ?";
-        int count = jdbcTemplate.queryForObject(sql, Integer.class, plaka);
-        return count > 0;
-    }
-
-    public Optional<AboneData> findByPlaka(String plaka) {
-        String sql = "SELECT Plaka, Ad, Soyad, Adres, TcKimlikNo, Telefon, Email FROM Plate.AboneData WHERE Plaka = ?";
-        try {
-            AboneData abone = jdbcTemplate.queryForObject(sql, aboneRowMapper, plaka);
-            return Optional.ofNullable(abone);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
-
-    public Optional<AboneData> findByTcKimlikNo(String tcKimlikNo) {
-        String sql = "SELECT Plaka, Ad, Soyad, Adres, TcKimlikNo, Telefon, Email FROM Plate.AboneData WHERE TcKimlikNo = ?";
-        try {
-            AboneData abone = jdbcTemplate.queryForObject(sql, aboneRowMapper, tcKimlikNo);
-            return Optional.ofNullable(abone);
-        } catch (Exception e) {
-            return Optional.empty();
-        }
-    }
-
     public List<AboneData> findAllByPlaka(String plaka) {
         String sql = "SELECT Plaka, Ad, Soyad, Adres, TcKimlikNo, Telefon, Email FROM Plate.AboneData WHERE Plaka = ?";
         try {
@@ -202,4 +176,14 @@ public class AboneDataRepository {
             return List.of();
         }
     }
-} 
+
+    public List<AboneData> findAllByAdSoyad(String adSoyad) {
+        String sql = "SELECT Plaka, Ad, Soyad, Adres, TcKimlikNo, Telefon, Email FROM Plate.AboneData WHERE AdSoyad LIKE CONCAT('%', ?, '%')";
+        try {
+            return jdbcTemplate.query(sql, aboneRowMapper, adSoyad);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+}

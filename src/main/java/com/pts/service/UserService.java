@@ -1,6 +1,7 @@
 package com.pts.service;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,13 +26,13 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        Optional<User> user = userRepository.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
         return new org.springframework.security.core.userdetails.User(
-            user.getUsername(),
-            user.getPassword(),
+            user.get().getUsername(),
+            user.get().getPassword(),
             Collections.singletonList(new SimpleGrantedAuthority("USER"))
         );
     }

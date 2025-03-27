@@ -1,11 +1,12 @@
 package com.pts.service;
 
-import com.pts.entity.AboneData;
-import com.pts.repository.AboneDataRepository;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
+
+import com.pts.entity.AboneData;
+import com.pts.repository.AboneDataRepository;
 
 @Service
 @Transactional
@@ -30,7 +31,7 @@ public class AboneService {
     }
 
     public boolean plakaVarMi(String plaka) {
-        return aboneDataRepository.existsByPlaka(plaka);
+        return !aboneDataRepository.findAllByPlaka(plaka).isEmpty();
     }
 
     public List<AboneData> findAllByPlaka(String plaka) {
@@ -41,13 +42,7 @@ public class AboneService {
         return aboneDataRepository.findAllByTcKimlikNo(tcKimlikNo);
     }
 
-    public Optional<AboneData> findByPlaka(String plaka) {
-        List<AboneData> aboneler = findAllByPlaka(plaka);
-        return aboneler.isEmpty() ? Optional.empty() : Optional.of(aboneler.get(0));
-    }
-
-    public Optional<AboneData> findByTcKimlikNo(String tcKimlikNo) {
-        List<AboneData> aboneler = findAllByTcKimlikNo(tcKimlikNo);
-        return aboneler.isEmpty() ? Optional.empty() : Optional.of(aboneler.get(0));
+    public List<AboneData> findAllByAdSoyad(String adSoyad) {
+        return aboneDataRepository.findAllByAdSoyad(adSoyad);
     }
 } 
