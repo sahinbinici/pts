@@ -1,0 +1,35 @@
+/* Kart güncelleme animasyonu */
+@keyframes cardHighlight {
+    0% {
+        background-color: #0d6efd;
+    }
+    50% {
+        background-color: #0d6efd99;
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.last-movement-card {
+    position: relative;
+    z-index: 1;
+}
+
+.last-movement-card.highlight-update {
+    animation: cardHighlight 2s ease-in-out;
+}
+
+/* Tablo satırı güncelleme animasyonu */
+@keyframes rowHighlight {
+    0% {
+        background-color: rgba(0, 123, 255, 0.2);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.movement-row.highlight-update {
+    animation: rowHighlight 2s ease-out;
+} 

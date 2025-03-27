@@ -1,0 +1,65 @@
+<!-- Plaka Hareket Section -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Plaka Hareketleri</h5>
+                </div>
+                <div class="card-body">
+                    <div class="last-movement-info mb-4">
+                        <h6 class="mb-3">Son Geçiş Yapan Araç</h6>
+                        <div class="card last-movement-card" style="transition: background-color 0.5s ease-in-out;">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <strong>Plaka:</strong>
+                                        <div id="lastMovementPlaka">-</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>İşlem Tarih:</strong>
+                                        <div id="lastMovementGecisTarih">-</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Hareket Tipi:</strong>
+                                        <div id="lastMovementHareketTipi">-</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <strong>Kamera No:</strong>
+                                        <div id="lastMovementKameraNo">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Son 30 Dakika Geçiş Yapan Araçlar Card'ı -->
+                    <div class="recent-movements-info">
+                        <h6 class="mb-3">Son 1 Saat Geçiş Yapan Araçlar</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Plaka</th>
+                                                <th>İşlem Tarih</th>
+                                                <th>Hareket Tipi</th>
+                                                <th>Kamera No</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recentMovementsTableBody">
+                                            <tr>
+                                                <td colspan="4" class="text-center">Yükleniyor...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
