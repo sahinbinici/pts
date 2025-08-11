@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Abone ekleme form handler'ı
     initializeAboneEkleForm();
 
+    // Initialize plaka hareket detay
+    if (typeof initializePlakaHareketDetayForm === 'function') {
+        initializePlakaHareketDetayForm();
+    }
+
     // Initialize sidebar navigation
     document.querySelectorAll('.nav-link[data-section]').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -39,6 +44,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedSection.style.display = 'block';
                 selectedSection.classList.add('active');
                 
+                // Update URL hash without triggering navigation
+                const newHash = this.getAttribute('data-section');
+                history.pushState(null, '', `#${newHash}`);
+                
                 // Plaka Hareket sayfası açıldığında
                 if (sectionId === 'plaka-hareket-content') {
                     loadLastMovement(); // Son hareketi yükle
@@ -54,7 +63,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const hash = window.location.hash.substring(1) || 'abone-ekle';
     const defaultLink = document.querySelector(`.nav-link[data-section="${hash}"]`);
     if (defaultLink) {
-        defaultLink.click();
+        // Manually set active state without triggering click event
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        defaultLink.classList.add('active');
+        
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.style.display = 'none';
+            section.classList.remove('active');
+        });
+        
+        const selectedSection = document.getElementById(`${hash}-content`);
+        if (selectedSection) {
+            selectedSection.style.display = 'block';
+            selectedSection.classList.add('active');
+            
+            if (hash === 'plaka-hareket') {
+                loadLastMovement();
+                startPolling();
+            }
+        }
     }
 });
 
@@ -310,7 +337,6 @@ function initializeAboneAraForm() {
 
 function showUpdateForm(aboneJson) {
     try {
-        console.log('Düzenleme formu açılıyor, veri:', aboneJson);
         const abone = JSON.parse(aboneJson);
         const form = document.getElementById('abone-guncelle-form');
         if (!form) {
@@ -327,10 +353,17 @@ function showUpdateForm(aboneJson) {
         form.querySelector('input[name="email"]').value = abone.email || '';
         form.querySelector('input[name="adres"]').value = abone.adres || '';
 
-        // Formu göster
+        // Orijinal plakayı sakla (hidden field olarak)
+        let originalPlakaInput = form.querySelector('input[name="originalPlaka"]');
+        if (!originalPlakaInput) {
+            originalPlakaInput = document.createElement('input');
+            originalPlakaInput.type = 'hidden';
+            originalPlakaInput.name = 'originalPlaka';
+            form.appendChild(originalPlakaInput);
+        }
+        originalPlakaInput.value = abone.plaka; // Orijinal plakayı sakla
+
         form.style.display = 'block';
-        
-        // Forma scroll
         form.scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
         console.error('Abone verisi işlenirken hata:', error);
@@ -340,20 +373,15 @@ function showUpdateForm(aboneJson) {
 
 function initializeAboneGuncelleForm() {
     const aboneGuncelleForm = document.getElementById('abone-guncelle-form');
-    if (!aboneGuncelleForm) {
-        console.error('Güncelleme formu bulunamadı!');
-        return;
-    }
-
-    console.log('Güncelleme formu başarıyla bulundu ve initialize ediliyor...');
+    if (!aboneGuncelleForm) return;
 
     aboneGuncelleForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        console.log('Güncelleme formu submit edildi');
         
         const formData = new FormData(this);
         const aboneData = {
-            plaka: formData.get('plaka'),
+            plaka: formData.get('plaka'),              // Yeni plaka
+            originalPlaka: formData.get('originalPlaka'), // Eski plaka
             ad: formData.get('ad'),
             soyad: formData.get('soyad'),
             tcKimlikNo: formData.get('tcKimlikNo'),
@@ -361,6 +389,12 @@ function initializeAboneGuncelleForm() {
             email: formData.get('email'),
             adres: formData.get('adres')
         };
+        
+        // CRITICAL: Ensure originalPlaka is not null/empty
+        if (!aboneData.originalPlaka || aboneData.originalPlaka.trim() === '') {
+            alert('Original plaka değeri eksik! Formu yeniden yükleyin.');
+            return;
+        }
         
         console.log('Güncellenecek veri:', aboneData);
         
@@ -372,14 +406,12 @@ function initializeAboneGuncelleForm() {
             body: JSON.stringify(aboneData)
         })
         .then(response => {
-            console.log('Sunucu yanıtı:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log('Sunucudan gelen yanıt:', data);
             if (data.error) {
                 throw new Error(data.error);
             }
@@ -392,6 +424,34 @@ function initializeAboneGuncelleForm() {
             alert('Güncelleme sırasında bir hata oluştu: ' + error.message);
         });
     });
+}
+
+// Function to populate the update form (you need to call this when editing)
+function populateUpdateForm(aboneData) {
+    const form = document.getElementById('abone-guncelle-form');
+    if (form) {
+        // Set all form fields
+        form.querySelector('[name="plaka"]').value = aboneData.plaka;
+        form.querySelector('[name="ad"]').value = aboneData.ad;
+        form.querySelector('[name="soyad"]').value = aboneData.soyad;
+        form.querySelector('[name="tcKimlikNo"]').value = aboneData.tcKimlikNo;
+        form.querySelector('[name="telefon"]').value = aboneData.telefon;
+        form.querySelector('[name="email"]').value = aboneData.email;
+        form.querySelector('[name="adres"]').value = aboneData.adres;
+        
+        // CRITICAL: Set the original plate in a hidden field
+        let originalPlakaField = form.querySelector('[name="originalPlaka"]');
+        if (!originalPlakaField) {
+            // Create hidden field if it doesn't exist
+            originalPlakaField = document.createElement('input');
+            originalPlakaField.type = 'hidden';
+            originalPlakaField.name = 'originalPlaka';
+            form.appendChild(originalPlakaField);
+        }
+        originalPlakaField.value = aboneData.plaka; // Use current plaka as original
+        
+        form.style.display = 'block';
+    }
 }
 
 function initializeAboneSilmeButton() {
@@ -545,4 +605,4 @@ window.addEventListener('hashchange', function() {
     if (link) {
         link.click();
     }
-}); 
+});

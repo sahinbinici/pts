@@ -1,10 +1,12 @@
 package com.pts.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pts.entity.PlakaHareket;
@@ -36,5 +38,16 @@ public class PlakaHareketController {
         PlakaHareket movement = plakaHareketService.getLastMovement();
         log.debug("Found last movement for plate: {}", movement != null ? movement.getPlaka() : "null");
         return movement;
+    }
+
+    @GetMapping("/search")
+    public List<PlakaHareket> searchPlakaHareketByDateRange(
+            @RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate,
+            @RequestParam(required = false) String plaka) {
+        log.debug("searchPlakaHareketByDateRange endpoint called with startDate: {}, endDate: {}, plaka: {}", startDate, endDate, plaka);
+        List<PlakaHareket> movements = plakaHareketService.searchPlakaHareketByDateRange(startDate, endDate, plaka);
+        log.debug("Found {} movements", movements.size());
+        return movements;
     }
 } 

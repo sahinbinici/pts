@@ -97,22 +97,72 @@ public class AboneController {
     @PutMapping("/guncelle")
     @ResponseBody
     public ResponseEntity<?> aboneGuncelle(@RequestBody AboneData aboneData) {
-        logger.info("Abone güncelle request received for plaka: {}", aboneData.getPlaka());
+        logger.info("Abone güncelle request received for plaka: {} (original: {})", 
+                   aboneData.getPlaka(), aboneData.getOriginalPlaka());
         Map<String, String> response = new HashMap<>();
         
         try {
+            // Validate input data
+            if (aboneData.getPlaka() == null || aboneData.getPlaka().trim().isEmpty()) {
+                response.put("error", "Plaka boş olamaz!");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // CRITICAL FIX: When originalPlaka is null, we need to find the existing record first
+            if (aboneData.getOriginalPlaka() == null || aboneData.getOriginalPlaka().trim().isEmpty()) {
+                logger.warn("No original plate provided. This might be an issue with the frontend.");
+                
+                // Try to find existing records to determine the original plate
+                // This is a workaround - the proper fix is in the frontend
+                List<AboneData> existingRecords = aboneService.findAllByTcKimlikNo(aboneData.getTcKimlikNo());
+                
+                if (!existingRecords.isEmpty()) {
+                    // Use the first matching record's plate as original
+                    aboneData.setOriginalPlaka(existingRecords.get(0).getPlaka());
+                    logger.info("Found existing record with plate: {}", aboneData.getOriginalPlaka());
+                } else {
+                    // If we can't find by TC, try by exact plate match
+                    List<AboneData> plateRecords = aboneService.findAllByPlaka(aboneData.getPlaka());
+                    if (!plateRecords.isEmpty()) {
+                        aboneData.setOriginalPlaka(aboneData.getPlaka());
+                        logger.info("Using same plate as original: {}", aboneData.getPlaka());
+                    } else {
+                        response.put("error", "Güncellenecek kayıt bulunamadı. Lütfen önce aboneyi arayın.");
+                        return ResponseEntity.badRequest().body(response);
+                    }
+                }
+            }
+            
+            // If plate number is being changed, check if the new plate already exists
+            if (!aboneData.getOriginalPlaka().equals(aboneData.getPlaka())) {
+                logger.info("Plate number change detected: {} -> {}", 
+                           aboneData.getOriginalPlaka(), aboneData.getPlaka());
+                
+                // Check if the new plate already exists for a different subscriber
+                List<AboneData> existingAboneler = aboneService.findAllByPlaka(aboneData.getPlaka());
+                
+                // Filter out the current record being updated
+                boolean plateExistsForOtherSubscriber = existingAboneler.stream()
+                    .anyMatch(existing -> !existing.getPlaka().equals(aboneData.getOriginalPlaka()));
+                
+                if (plateExistsForOtherSubscriber) {
+                    response.put("error", "Bu plaka başka bir aboneye kayıtlı!");
+                    return ResponseEntity.badRequest().body(response);
+                }
+            }
+
             Integer result = aboneService.updateAbone(aboneData);
             if (result > 0) {
                 response.put("success", "Abone başarıyla güncellendi.");
                 return ResponseEntity.ok(response);
             } else {
-                response.put("error", "Abone güncelleme işlemi başarısız oldu.");
+                response.put("error", "Abone güncelleme işlemi başarısız oldu. Kayıt bulunamadı.");
                 return ResponseEntity.badRequest().body(response);
             }
         } catch (Exception e) {
             logger.error("Error while updating abone", e);
             response.put("error", "Güncelleme sırasında bir hata oluştu: " + e.getMessage());
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -137,4 +187,4 @@ public class AboneController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-} 
+}

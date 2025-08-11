@@ -8,6 +8,7 @@ import lombok.Setter;
 public class AboneData {
     private Integer aboneId;
     private String plaka;
+    private String originalPlaka;
     private String ad;
     private String soyad;
     private String adres;

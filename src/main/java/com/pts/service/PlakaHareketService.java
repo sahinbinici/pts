@@ -1,5 +1,6 @@
 package com.pts.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -21,5 +22,9 @@ public class PlakaHareketService {
 
     public PlakaHareket getLastMovement() {
         return plakaHareketRepository.findLastMovement();
+    }
+
+    public List<PlakaHareket> searchPlakaHareketByDateRange(LocalDateTime startDate, LocalDateTime endDate, String plaka) {
+        return plakaHareketRepository.searchPlakaHareketByDateRange(startDate, endDate, plaka);
     }
 } 

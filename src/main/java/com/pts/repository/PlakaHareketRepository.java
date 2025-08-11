@@ -1,8 +1,8 @@
 package com.pts.repository;
 
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,6 +44,15 @@ public class PlakaHareketRepository {
         String sql = "SELECT * FROM Kamera.sb_SonKameraGecislerV2 ORDER BY SonGecisTarih DESC";
         List<PlakaHareket> results = jdbcTemplate.query(sql, plakaHareketRowMapper);
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    public List<PlakaHareket> searchPlakaHareketByDateRange(LocalDateTime startDate, LocalDateTime endDate, String plaka) {
+        String sql = "SELECT * FROM Kamera.v_SonPlakaGecisleri_SB WHERE SonGecisTarih BETWEEN ? AND ?";
+        if (plaka != null && !plaka.trim().isEmpty()) {
+            sql += " AND SonGecisPlaka = ?";
+            return jdbcTemplate.query(sql, plakaHareketRowMapper, startDate, endDate, plaka);
+        }
+        return jdbcTemplate.query(sql, plakaHareketRowMapper, startDate, endDate);
     }
 
 } 
